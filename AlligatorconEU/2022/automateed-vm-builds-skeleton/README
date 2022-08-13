@@ -1,0 +1,12 @@
+# Automated VM builds
+
+This skeleton was created for my talk at AlligatorCon Europe 2022. It demonstrates how to automatically build a ready-to-use Kali VM using an azure pipline and packer. I hope it helps :).
+
+## Requirements
+- [packer](https://github.com/hasicorp/packer)
+- VMWare Workstation
+
+## Portability
+You can easily substitute the azure pipeline with whatever you want (Gitlab CI, cronjob, etc.) as long as it can call packer.
+inside the packer config file you can also change the builder to whatever you fancy, as long as packer supports it (e.g. Qemu, VitrualBox, AWS AMI, etc.). Have a look at packers [documentation](https://www.packer.io/plugins).
+If packer does not yet support the VM environment you like, feel free to [implement it](https://www.github.com/hashicorp/packer) as packer is fully open source.

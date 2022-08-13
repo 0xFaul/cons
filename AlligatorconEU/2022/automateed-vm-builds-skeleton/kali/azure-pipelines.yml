@@ -1,0 +1,45 @@
+schedules:
+- cron: "00 0 1,15 * 0"
+  displayName: biweekly build
+  branches:
+    include:
+    - master
+  always: true
+
+trigger:            # trigger build on every new commit
+  batch: true
+  branches:
+    include:
+    - master
+
+pool:
+  name: agent_pool  # name of azure agent pool
+  demands:          # requirements for agent pool to select correct one
+  - vmware
+  - packer
+
+jobs:
+- job: build
+  timeoutInMinutes: 240
+  workspace:
+    clean: all
+  steps:
+  - checkout: self
+    clean: true
+  - bash: packer build kali.pkr.hcl
+    displayName: 'Build VM'
+    workingDirectory: $(Build.SourcesDirectory)/kali
+    env:
+      VAULT_PASS: $(ansible_vault_pass) # pass ansible vault password to packer
+      VM_OUTPUT_DIRECTORY: $(Build.ArtifactStagingDirectory)
+  - bash: scp $(Build.ArtifactStagingDirectory)/* /var/www/vm-builds/kali/
+      displayName: 'Copy to Webserver'
+  - task: DeleteFiles@1
+    displayName: 'Delete huge artifact files'
+    condition: always()
+    inputs:
+      SourceFolder: $(Pipeline.Workspace)
+      contents: |
+        a/*
+        s/kali/output-kali
+
